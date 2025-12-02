@@ -142,7 +142,7 @@ export default function MarketIntelDashboard() {
                 </div>
                 <div>
                   <h1 className="text-lg font-bold tracking-tight">Market<span className="text-cyan-400">Intel</span></h1>
-                  <p className="text-[10px] text-slate-500 -mt-0.5">AI-Powered Analysis</p>
+                  <p className="text-[10px] text-slate-500 -mt-0.5">AI-Powered Analysis <span className="text-cyan-400">by Jean Huang</span></p>
                 </div>
               </div>
               <div className="h-8 w-px bg-slate-800 mx-2" />
@@ -222,12 +222,13 @@ export default function MarketIntelDashboard() {
                     </linearGradient>
                   </defs>
                   <XAxis dataKey="time" stroke="#475569" fontSize={10} tickLine={false} axisLine={false} />
-                  <YAxis stroke="#475569" fontSize={10} tickLine={false} axisLine={false} domain={['dataMin - 20', 'dataMax + 20']} />
+                  <YAxis yAxisId="left" stroke="#475569" fontSize={10} tickLine={false} axisLine={false} domain={['dataMin - 20', 'dataMax + 20']} />
+                  <YAxis yAxisId="right" orientation="right" stroke="#A855F7" fontSize={10} tickLine={false} axisLine={false} domain={[0, 1]} />
                   <Tooltip 
                     contentStyle={{ background: '#1e293b', border: '1px solid #334155', borderRadius: '12px', fontSize: '12px' }}
                     labelStyle={{ color: '#94a3b8' }}
                   />
-                  <Area type="monotone" dataKey="sp500" stroke="#00D4FF" strokeWidth={2} fill="url(#colorSp)" />
+                  <Area type="monotone" dataKey="sp500" stroke="#00D4FF" strokeWidth={2} fill="url(#colorSp)" yAxisId="left" />
                   <Line type="monotone" dataKey="sentiment" stroke="#A855F7" strokeWidth={2} dot={false} yAxisId="right" />
                 </AreaChart>
               </ResponsiveContainer>
@@ -374,6 +375,7 @@ export default function MarketIntelDashboard() {
 
         {activeTab === 'analysis' && (
           <div className="grid grid-cols-12 gap-5">
+            {/* Main Chart */}
             <div className="col-span-8 card-gradient rounded-2xl border border-slate-800/50 p-6">
               <h2 className="text-lg font-semibold mb-4">Technical Analysis Dashboard</h2>
               <p className="text-slate-400 text-sm mb-6">Real-time technical indicators with ML-enhanced signal detection</p>
@@ -392,20 +394,85 @@ export default function MarketIntelDashboard() {
                 </AreaChart>
               </ResponsiveContainer>
             </div>
+            
+            {/* Technical Indicators */}
             <div className="col-span-4 space-y-4">
-              {['RSI', 'MACD', 'Bollinger Bands', 'Moving Averages'].map((indicator, i) => (
-                <div key={i} className="card-gradient rounded-xl border border-slate-800/50 p-4">
+              {[
+                { name: 'RSI (14)', value: 58 + Math.floor(Math.random() * 10), threshold: 70, signal: 'Bullish', desc: 'Momentum neutral, room to run' },
+                { name: 'MACD', value: 72 + Math.floor(Math.random() * 8), threshold: 50, signal: 'Bullish', desc: 'Signal line crossover detected' },
+                { name: 'Bollinger Bands', value: 45 + Math.floor(Math.random() * 15), threshold: 50, signal: 'Neutral', desc: 'Price near middle band' },
+                { name: 'SMA 50/200', value: 82 + Math.floor(Math.random() * 5), threshold: 50, signal: 'Bullish', desc: 'Golden cross confirmed' },
+              ].map((indicator, i) => (
+                <div key={i} className="card-gradient rounded-xl border border-slate-800/50 p-4 hover:border-purple-500/30 transition-all">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="font-medium text-sm">{indicator}</span>
-                    <span className={`text-xs px-2 py-0.5 rounded-full ${i % 2 === 0 ? 'bg-emerald-500/20 text-emerald-400' : 'bg-yellow-500/20 text-yellow-400'}`}>
-                      {i % 2 === 0 ? 'Bullish' : 'Neutral'}
+                    <span className="font-medium text-sm">{indicator.name}</span>
+                    <span className={`text-xs px-2 py-0.5 rounded-full ${
+                      indicator.signal === 'Bullish' ? 'bg-emerald-500/20 text-emerald-400' : 
+                      indicator.signal === 'Bearish' ? 'bg-red-500/20 text-red-400' : 
+                      'bg-yellow-500/20 text-yellow-400'
+                    }`}>
+                      {indicator.signal}
                     </span>
                   </div>
-                  <div className="h-2 bg-slate-800 rounded-full overflow-hidden">
-                    <div className={`h-full rounded-full ${i % 2 === 0 ? 'bg-emerald-400' : 'bg-yellow-400'}`} style={{ width: `${60 + i * 10}%` }} />
+                  <div className="h-2 bg-slate-800 rounded-full overflow-hidden mb-2">
+                    <div 
+                      className={`h-full rounded-full transition-all duration-500 ${
+                        indicator.signal === 'Bullish' ? 'bg-emerald-400' : 
+                        indicator.signal === 'Bearish' ? 'bg-red-400' : 
+                        'bg-yellow-400'
+                      }`} 
+                      style={{ width: `${indicator.value}%` }} 
+                    />
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs text-slate-500">{indicator.desc}</span>
+                    <span className="text-xs font-mono text-slate-400">{indicator.value}%</span>
                   </div>
                 </div>
               ))}
+            </div>
+
+            {/* Volume Analysis */}
+            <div className="col-span-6 card-gradient rounded-2xl border border-slate-800/50 p-6">
+              <h3 className="text-md font-semibold mb-4">Volume Analysis</h3>
+              <ResponsiveContainer width="100%" height={200}>
+                <BarChart data={chartData.slice(-12)}>
+                  <XAxis dataKey="time" stroke="#475569" fontSize={10} />
+                  <YAxis stroke="#475569" fontSize={10} />
+                  <Tooltip contentStyle={{ background: '#1e293b', border: '1px solid #334155', borderRadius: '12px' }} />
+                  <Bar dataKey="sp500" fill="#00D4FF" radius={[4, 4, 0, 0]}>
+                    {chartData.slice(-12).map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={index % 2 === 0 ? '#00D4FF' : '#A855F7'} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+
+            {/* Signal Summary */}
+            <div className="col-span-6 card-gradient rounded-2xl border border-slate-800/50 p-6">
+              <h3 className="text-md font-semibold mb-4">ML Signal Summary</h3>
+              <div className="grid grid-cols-3 gap-4 mb-4">
+                <div className="text-center p-4 bg-emerald-500/10 rounded-xl border border-emerald-500/20">
+                  <p className="text-2xl font-bold text-emerald-400">7</p>
+                  <p className="text-xs text-slate-500">Bullish</p>
+                </div>
+                <div className="text-center p-4 bg-yellow-500/10 rounded-xl border border-yellow-500/20">
+                  <p className="text-2xl font-bold text-yellow-400">3</p>
+                  <p className="text-xs text-slate-500">Neutral</p>
+                </div>
+                <div className="text-center p-4 bg-red-500/10 rounded-xl border border-red-500/20">
+                  <p className="text-2xl font-bold text-red-400">2</p>
+                  <p className="text-xs text-slate-500">Bearish</p>
+                </div>
+              </div>
+              <div className="p-4 bg-slate-900/50 rounded-xl">
+                <div className="flex items-center gap-2 mb-2">
+                  <CheckCircle size={16} className="text-emerald-400" />
+                  <span className="font-medium text-sm">Overall Signal: Moderately Bullish</span>
+                </div>
+                <p className="text-xs text-slate-400">Based on 12 technical indicators and ML pattern recognition. Confidence: 73%</p>
+              </div>
             </div>
           </div>
         )}
@@ -475,7 +542,7 @@ export default function MarketIntelDashboard() {
       {/* Footer */}
       <footer className="border-t border-slate-800/50 mt-12 py-6">
         <div className="max-w-[1600px] mx-auto px-6 flex items-center justify-between text-xs text-slate-500">
-          <p>Built with React, Recharts, and AI • <span className="text-cyan-400">Portfolio Project by Jelly</span></p>
+          <p>Built with React, Recharts, and AI • <span className="text-cyan-400">Portfolio Project by Jean Huang</span></p>
           <p>Real-time simulation for demonstration purposes</p>
         </div>
       </footer>
